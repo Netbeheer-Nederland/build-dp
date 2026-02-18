@@ -7,12 +7,21 @@
 
 Zorg dat je ingelogd bent:
 
+[source,shell]
+....
 $ docker login
+....
 
 Met de repository root als current working directory, bouw de nieuwe image:
 
-$ docker build -t ghcr.io/netbeheer-nederland/dataproducten:latest .
+[source,shell]
+....
+$ docker build -t ghcr.io/netbeheer-nederland/build-dp:latest .
+....
 
 Push de nieuwe image naar GHCR:
 
-$ docker push ghcr.io/netbeheer-nederland/dataproducten:latest
+[source,shell]
+....
+$ docker push ghcr.io/netbeheer-nederland/build-dp:latest
+....
