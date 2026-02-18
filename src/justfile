@@ -37,14 +37,14 @@ _generate_asciidoc:
     mkdir -p "output/docs/adoc/modules/schema"
     python -m linkml_asciidoc_generator.main \
         -o output/docs/adoc/modules/schema \
-        -t /opt/dataproducten/templates \
+        -t /opt/build/templates \
         --render-diagrams \
         output/schemas/{{name}}.linkml.yml
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
     echo
     echo "Adding root nav…"
-    cp /opt/dataproducten/antora/root-nav.adoc output/docs/adoc/modules/ROOT/
+    cp /opt/build/antora/root-nav.adoc output/docs/adoc/modules/ROOT/
     yq -i '.nav = ["modules/ROOT/root-nav.adoc"] + .nav' output/docs/adoc/antora.yml
     echo
 
@@ -105,10 +105,10 @@ generate-and-assemble: _clean _post-process-schema validate-examples _generate_a
 build: 
     @echo "Generating site using Antora…"
     @if [ $CI == "true"  ]; then \
-        jinja -D site_url https://modellen.netbeheernederland.nl/{{name}} -D site_title {{site_title}} /opt/dataproducten/antora/antora-playbook.yml.jinja > /tmp/antora-playbook.yml; \
+        jinja -D site_url https://modellen.netbeheernederland.nl/{{name}} -D site_title {{site_title}} /opt/build/antora/antora-playbook.yml.jinja > /tmp/antora-playbook.yml; \
         antora --fetch /tmp/antora-playbook.yml; \
     else \
-        jinja -D site_url http://localhost:8080 -D site_title {{site_title}} /opt/dataproducten/antora/antora-playbook.local.yml.jinja > /tmp/antora-playbook.local.yml; \
+        jinja -D site_url http://localhost:8080 -D site_title {{site_title}} /opt/build/antora/antora-playbook.local.yml.jinja > /tmp/antora-playbook.local.yml; \
         antora --fetch /tmp/antora-playbook.local.yml; \
     fi
     @echo
