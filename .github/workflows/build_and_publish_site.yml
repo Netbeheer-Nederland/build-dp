@@ -1,4 +1,4 @@
-name: Publish to GitHub Pages
+name: Build and publish site
 on:
   workflow_call:
 defaults:
@@ -15,7 +15,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/netbeheer-nederland/dataproducten:latest
+      image: ghcr.io/netbeheer-nederland/build-dp:latest
       options: --user 1001
     environment:
       name: github-pages
