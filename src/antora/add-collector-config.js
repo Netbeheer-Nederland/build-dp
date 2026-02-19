@@ -17,6 +17,10 @@ module.exports.register = function () {
 
         }
         Object.assign((origin.descriptor.ext ??= {}), { collector })
+
+        if (origin.reftype === "branch") {
+            origin.descriptor.prerelease = true
+        }
       }
     }
   })
