@@ -88,7 +88,7 @@ _post-process-schema:
     yq -i '.version = strenv(version)' output/schemas/{{name}}.linkml.yml
     yq -i '.id = "https://modellen.netbeheernederland.nl/{{name}}/" + strenv(version)' output/schemas/{{name}}.linkml.yml
     yq -i '.annotations.environment = strenv(ENV_URL)' output/schemas/{{name}}.linkml.yml
-    yq -i '.generation_date = {{shell("date -I")}}' output/schemas/{{name}}.linkml.yml
+    yq -i '.generation_date = "{{shell("date -I")}}"' output/schemas/{{name}}.linkml.yml
 
 # Generate and assemble
 [group("development"),private]
