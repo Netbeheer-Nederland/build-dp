@@ -87,9 +87,8 @@ _post-process-schema:
     cp src/model/{{name}}.linkml.yml output/schemas/{{name}}.linkml.yml
     yq -i '.version = strenv(version)' output/schemas/{{name}}.linkml.yml
     yq -i '.id = "https://modellen.netbeheernederland.nl/{{name}}/" + strenv(version)' output/schemas/{{name}}.linkml.yml
-
-    # Write env version as metadata to schema.
-    # Generation date.
+    yq -i '.annotations.environment = strenv(ENV_URL)' output/schemas/{{name}}.linkml.yml
+    yq -i '.generation_date = {{shell("date -I")}}' output/schemas/{{name}}.linkml.yml
 
 # Generate and assemble
 [group("development"),private]
