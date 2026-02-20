@@ -22,7 +22,7 @@ _clean:
 [group("development")]
 preview: build serve
 
-_generate_asciidoc:
+_generate-asciidoc:
     #!/bin/bash
     set -e
     echo -e "Generating documentation (AsciiDoc)…"
@@ -53,7 +53,7 @@ _generate_asciidoc:
     fi
     echo
 
-_generate_additional_schemas:
+_generate-additional-schemas:
     #!/bin/bash
     set -e
     echo -e "Generating artifacts…"
@@ -78,7 +78,7 @@ _generate_additional_schemas:
         echo -e "To reference use:\n\txref:schema:attachment\$$schema[]"; \
     done
 
-_generate_json_examples:
+_generate-json-examples:
     #!/bin/bash
     set -e
     echo -e "Copy examples (JSON) to schema documentation…"
@@ -102,7 +102,7 @@ _post-process-schema:
 
 # Generate and assemble
 [group("development"),private]
-generate-and-assemble: _clean _post-process-schema validate-examples _generate_asciidoc _generate_additional_schemas _generate_json_examples
+generate-and-assemble: _clean _post-process-schema validate-examples _generate-asciidoc _generate-additional-schemas _generate-json-examples
 
 # Build website locally
 [group("development")]
