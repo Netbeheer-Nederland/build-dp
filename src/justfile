@@ -42,7 +42,11 @@ _generate_asciidoc:
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
     echo 'Setting `version` key…'
-    yq -i '.version = strenv(REF_NAME)' output/docs/adoc/antora.yml
+    if [[ "$REF_NAME" == "main" ]]; then \
+        yq -i '.version = "upcoming"' output/docs/adoc/antora.yml; \
+    else \
+        yq -i '.version = strenv(REF_NAME)' output/docs/adoc/antora.yml; \
+    fi
     echo 'Setting `prerelease` key if applicable…'
     if [[ "$REF_NAME" == "main" || "$REF_NAME" == "draft" ]]; then \
         yq -i '.prerelease = true' output/docs/adoc/antora.yml; \
