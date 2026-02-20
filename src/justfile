@@ -41,6 +41,12 @@ _generate_asciidoc:
         output/schemas/{{name}}.linkml.yml
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
+    echo 'Setting `version` key…'
+    yq -i '.version = strenv(REF_NAME)' output/docs/adoc/antora.yml
+    echo 'Setting `prerelease` key if applicable…'
+    if [[ "$REF_NAME" == "main" || "$REF_NAME" == "draft" ]]; then \
+        yq -i '.prerelease = true' output/docs/adoc/antora.yml; \
+    fi
     echo
 
 _generate_additional_schemas:
@@ -85,8 +91,8 @@ _generate_json_examples:
 _post-process-schema:
     mkdir -p output/schemas
     cp src/model/{{name}}.linkml.yml output/schemas/{{name}}.linkml.yml
-    yq -i '.version = strenv(version)' output/schemas/{{name}}.linkml.yml
-    yq -i '.id = "https://modellen.netbeheernederland.nl/{{name}}/" + strenv(version)' output/schemas/{{name}}.linkml.yml
+    yq -i '.version = strenv(REF_NAME)' output/schemas/{{name}}.linkml.yml
+    yq -i '.id = "https://modellen.netbeheernederland.nl/{{name}}/" + strenv(REF_NAME)' output/schemas/{{name}}.linkml.yml
     yq -i '.annotations.environment = strenv(ENV_URL)' output/schemas/{{name}}.linkml.yml
     yq -i '.generation_date = "{{shell("date -I")}}"' output/schemas/{{name}}.linkml.yml
 

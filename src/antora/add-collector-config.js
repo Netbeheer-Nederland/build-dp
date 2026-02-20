@@ -7,7 +7,7 @@ module.exports.register = function () {
         let collector = {
           run: {
               command: `just generate-and-assemble`,
-              env: [{ name: "version",
+              env: [{ name: "REF_NAME",
                       value: origin.refname}]
           },
           scan: {
@@ -17,10 +17,6 @@ module.exports.register = function () {
 
         }
         Object.assign((origin.descriptor.ext ??= {}), { collector })
-
-        if (origin.reftype === "branch") {
-            origin.descriptor.prerelease = true
-        }
       }
     }
   })
