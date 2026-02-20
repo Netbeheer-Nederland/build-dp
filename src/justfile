@@ -2,6 +2,8 @@ set shell := ["bash", "-uc"]
 name := shell("yq .name src/model/*.linkml.yml | tr '-' '_'")
 title := shell("yq .title ./src/model/*.linkml.yml")
 site_title := shell("yq .title src/model/*.linkml.yml")
+ref_name := env("REF_NAME", shell("git rev-parse --abbrev-ref HEAD")) 
+version := if ref_name == "main" { "upcoming" } else { ref_name }
 
 _default:
     @just --list --unsorted --justfile {{justfile()}}
@@ -42,13 +44,9 @@ _generate-asciidoc:
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
     echo 'Setting `version` key…'
-    if [[ "$REF_NAME" == "main" ]]; then \
-        yq -i '.version = "upcoming"' output/docs/adoc/antora.yml; \
-    else \
-        yq -i '.version = strenv(REF_NAME)' output/docs/adoc/antora.yml; \
-    fi
+    yq -i '.version = "{{version}}"' output/docs/adoc/antora.yml; \
     echo 'Setting `prerelease` key if applicable…'
-    if [[ "$REF_NAME" == "main" || "$REF_NAME" == "draft" ]]; then \
+    if [[ "{{ref_name}}" == "main" || "{{ref_name}}" == "draft" ]]; then \
         yq -i '.prerelease = true' output/docs/adoc/antora.yml; \
     fi
     echo
@@ -95,8 +93,8 @@ _generate-json-examples:
 _post-process-schema:
     mkdir -p output/schemas
     cp src/model/{{name}}.linkml.yml output/schemas/{{name}}.linkml.yml
-    yq -i '.version = strenv(REF_NAME)' output/schemas/{{name}}.linkml.yml
-    yq -i '.id = "https://modellen.netbeheernederland.nl/{{name}}/" + strenv(REF_NAME)' output/schemas/{{name}}.linkml.yml
+    yq -i '.version = "{{version}}"' output/schemas/{{name}}.linkml.yml
+    yq -i '.id = "https://modellen.netbeheernederland.nl/{{name}}/{{version}}"' output/schemas/{{name}}.linkml.yml
     yq -i '.annotations.environment = strenv(ENV_URL)' output/schemas/{{name}}.linkml.yml
     yq -i '.generation_date = "{{shell("date -I")}}"' output/schemas/{{name}}.linkml.yml
 
