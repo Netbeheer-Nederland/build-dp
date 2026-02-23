@@ -112,8 +112,8 @@ _post-process-schema:
     yq -i '.generation_date = "{{shell("date -I")}}"' output/schemas/{{name}}.linkml.yml
 
 # Build processing logic called by Antora Collector.
-[group("development"),private]
-_build: _clean _post-process-schema _generate-asciidoc _generate-schemas _generate-example-data _assemble-docs validate-example-data
+[group("development")]
+_build: _clean _post-process-schema _generate-asciidoc _generate-schemas _generate-example-data _assemble-docs _validate-example-data
 
 # Build website locally
 [group("development")]
@@ -138,13 +138,11 @@ serve:
     http-serve output/docs/html
 
 # Create example data
-[group("examples")]
-create-example-data:
-    @echo TODO…
+#[group("examples")]
+#create-example-data:
+#    @echo TODO…
 
-# Generate example data artifacts
-[group("examples")]
-_generate-example-data: (_clean "examples")
+_generate-example-data:
     #!/bin/bash
     set shopt -e
     echo -e "Generating example data…"
@@ -170,9 +168,7 @@ _generate-example-data: (_clean "examples")
     echo -e "Generated example data at: output/examples"
     echo
 
-# Validate example data
-[group("examples")]
-validate-example-data: _generate-example-data
+_validate-example-data:
     @echo "Validating example data…"
     @echo
     @if [ "{{exchange_format}}" == "application/ld+json" ]; then \
@@ -187,3 +183,7 @@ validate-example-data: _generate-example-data
         done; \
     fi
     @echo
+
+# Validate example data
+[group("examples")]
+validate-example-data: _clean _post-process-schema _generate-schemas _generate-example-data _validate-example-data
