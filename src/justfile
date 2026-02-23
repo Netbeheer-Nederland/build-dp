@@ -58,8 +58,7 @@ _generate-schemas:
     set -e
     echo -e "Generating artifacts…"
 
-    cp output/schemas/{{name}}.linkml.yml output/docs/adoc/modules/schema/attachments/
-    if [ {{exchange_format}} == "application/json" ]; then \
+    if [ "{{exchange_format}}" == "application/json" ]; then \
         echo "Generating JSON Schema…"; \
         mkdir -p output/schemas/json_schema; \
         echo; \
@@ -71,8 +70,7 @@ _generate-schemas:
         echo; \
         echo "Generated JSON Schema at: output/schemas/json_schema/{{name}}.json_schema.json"; \
         echo; \
-        cp output/schemas/json_schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/; \
-    elif [ {{exchange_format}} == "application/ld+json" ]; then \
+    elif [ "{{exchange_format}}" == "application/ld+json" ]; then \
         echo "Generating SHACL…"; \
         mkdir -p output/schemas/shacl; \
         echo; \
@@ -84,9 +82,26 @@ _generate-schemas:
         echo; \
         echo "Generated SHACL schema at: output/schemas/shacl/{{name}}.shacl.ttl"; \
         echo; \
-        cp output/schemas/shacl/{{name}}.shacl.ttl output/docs/adoc/modules/schema/attachments/; \
     fi
-    #echo -e "To reference use:\n\txref:schema:attachment\$$schema[]"; \
+
+_create_xrefs:
+    @echo TODO…
+    #echo "You can include the artifacts in your documentation using the following xrefs statements:"
+    #echo -e \txref:schema:attachment\${{name}}.linkml.yml >> $xrefs_file
+    #for attachment_file in output/docs/adoc/modules/schema/attachments/*; do \
+    #    attachment_name=$(basename $attachment_file); \
+    #    echo -e xref:schema:attachment\$$attachment_name; \
+    #done
+
+_assemble-docs: && _create_xrefs
+    cp output/schemas/{{name}}.linkml.yml output/docs/adoc/modules/schema/attachments/
+    if [ "{{exchange_format}}" == "application/ld+json" ]; then \
+        cp output/examples/*.jsonld output/docs/adoc/modules/schema/attachments/; \
+        cp output/schemas/shacl/{{name}}.shacl.ttl output/docs/adoc/modules/schema/attachments/; \
+    elif [ "{{exchange_format}}" == "application/json" ]; then \
+        cp output/examples/*.json output/docs/adoc/modules/schema/attachments/; \
+        cp output/schemas/json_schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/; \
+    fi
 
 _post-process-schema:
     mkdir -p output/schemas
@@ -98,13 +113,13 @@ _post-process-schema:
 
 # Build processing logic called by Antora Collector.
 [group("development"),private]
-_build: _clean _post-process-schema _generate-asciidoc _generate-schemas generate-example-data validate-example-data
+_build: _clean _post-process-schema _generate-asciidoc _generate-schemas _generate-example-data _assemble-docs validate-example-data
 
 # Build website locally
 [group("development")]
 build: 
     @echo "Generating site using Antora…"
-    @if [ $CI == "true"  ]; then \
+    @if [ $CI == "true" ]; then \
         jinja -D site_url https://modellen.netbeheernederland.nl/{{name}} -D site_title "{{site_title}}" /opt/build/antora/antora-playbook.yml.jinja > /tmp/antora-playbook.yml; \
         antora --fetch /tmp/antora-playbook.yml; \
     else \
@@ -129,23 +144,26 @@ create-example-data:
 
 # Generate example data artifacts
 [group("examples")]
-generate-example-data: (_clean "examples")
+_generate-example-data: (_clean "examples")
     #!/bin/bash
     set shopt -e
     echo -e "Generating example data…"
     mkdir -p output/examples
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         ext=jsonld; \
-    else \
+    elif [ "{{exchange_format}}" == "application/json" ]; then \
         ext=json; \
+    else \
+        echo "No validation checks to run."
+        exit 0
     fi
     for example_file in src/examples/*.yml; do \
+        [ -f "$example_file" ] || continue; \
         example_name=$(basename $example_file); \
         gen-linkml-profile \
             convert \
             $example_file \
             --out "output/examples/${example_name%.*}.$ext"; \
-        #cp "output/examples/${example_name%.*}.$ext" output/docs/adoc/modules/schema/attachments/;
     done
     echo "… OK."
     echo
@@ -154,15 +172,17 @@ generate-example-data: (_clean "examples")
 
 # Validate example data
 [group("examples")]
-validate-example-data:
+validate-example-data: _generate-example-data
     @echo "Validating example data…"
     @echo
     @if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_file in output/examples/*; do \
+            [ -f "$example_file" ] || continue; \
             pyshacl -s output/schemas/shacl/{{name}}.shacl.ttl -df json-ld -f human $example_file; \
         done; \
     elif [ "{{exchange_format}}" == "application/json" ]; then \
         for example_file in output/examples/*; do \
+            [ -f "$example_file" ] || continue; \
             check-jsonschema --schemafile output/schemas/json_schema/{{name}}.json_schema.json $example_file; \
         done; \
     fi
