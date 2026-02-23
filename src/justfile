@@ -42,7 +42,7 @@ _generate-asciidoc:
         -o output/docs/adoc/modules/schema \
         -t /opt/build/templates \
         --render-diagrams \
-        output/schemas/{{name}}.linkml.yml
+        output/model/{{name}}.linkml.yml
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
     echo 'Setting `version` key…'
@@ -64,7 +64,7 @@ _generate-schemas:
         echo; \
         gen-json-schema \
             --not-closed \
-            output/schemas/{{name}}.linkml.yml \
+            output/model/{{name}}.linkml.yml \
             > output/schemas/json_schema/{{name}}.json_schema.json; \
         echo "… OK."; \
         echo; \
@@ -76,7 +76,7 @@ _generate-schemas:
         echo; \
         gen-shacl \
             --non-closed \
-            output/schemas/{{name}}.linkml.yml \
+            output/model/{{name}}.linkml.yml \
             > output/schemas/shacl/{{name}}.shacl.ttl; \
         echo "… OK."; \
         echo; \
@@ -94,7 +94,7 @@ _create_xrefs:
     #done
 
 _assemble-docs: && _create_xrefs
-    cp output/schemas/{{name}}.linkml.yml output/docs/adoc/modules/schema/attachments/
+    cp output/model/{{name}}.linkml.yml output/docs/adoc/modules/schema/attachments/
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         cp output/examples/*.jsonld output/docs/adoc/modules/schema/attachments/; \
         cp output/schemas/shacl/{{name}}.shacl.ttl output/docs/adoc/modules/schema/attachments/; \
@@ -104,12 +104,12 @@ _assemble-docs: && _create_xrefs
     fi
 
 _post-process-schema:
-    mkdir -p output/schemas
-    cp src/model/{{name}}.linkml.yml output/schemas/{{name}}.linkml.yml
-    yq -i '.version = "{{version}}"' output/schemas/{{name}}.linkml.yml
-    yq -i '.id = "{{schema_id}}"' output/schemas/{{name}}.linkml.yml
-    yq -i '.annotations.environment = strenv(ENV_URL)' output/schemas/{{name}}.linkml.yml
-    yq -i '.generation_date = "{{shell("date -I")}}"' output/schemas/{{name}}.linkml.yml
+    mkdir -p output/model
+    cp src/model/{{name}}.linkml.yml output/model/{{name}}.linkml.yml
+    yq -i '.version = "{{version}}"' output/model/{{name}}.linkml.yml
+    yq -i '.id = "{{schema_id}}"' output/model/{{name}}.linkml.yml
+    yq -i '.annotations.environment = strenv(ENV_URL)' output/model/{{name}}.linkml.yml
+    yq -i '.generation_date = "{{shell("date -I")}}"' output/model/{{name}}.linkml.yml
 
 # Build processing logic called by Antora Collector.
 [group("development")]
