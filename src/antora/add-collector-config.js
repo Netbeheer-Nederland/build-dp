@@ -6,7 +6,7 @@ module.exports.register = function () {
       for (const origin of origins) {
         let collector = {
           run: {
-              command: `just generate-and-assemble`,
+              command: `just _build`,
               env: [{ name: "REF_NAME",
                       value: origin.refname}]
           },

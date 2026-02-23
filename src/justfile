@@ -70,9 +70,21 @@ _generate-additional-schemas:
         echo "Generated JSON Schema at: output/schemas/json-schema/{{name}}.json_schema.json"
         echo
         cp output/schemas/json-schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/
+    elif [ "$(yq '.annotations.additional_schema // ""' output/schemas/{{name}}.linkml.yml)" == "shacl" ]; then
+        echo "Generating SHACL…"
+        mkdir -p output/schemas/shacl
+        echo
+        gen-shacl \
+            --non-closed \
+            output/schemas/{{name}}.linkml.yml \
+            > output/schemas/shacl/{{name}}.shacl.ttl
+        echo "… OK."
+        echo
+        echo "Generated SHACL schema at: output/schemas/shacl/{{name}}.shacl.ttl"
+        echo
+        cp output/schemas/shacl/{{name}}.shacl.ttl output/docs/adoc/modules/schema/attachments/
     fi
-    cp -r output/schemas/json-schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/; \
-    echo -e "To reference use:\n\txref:schema:attachment\$$schema[]"; \
+    #echo -e "To reference use:\n\txref:schema:attachment\$$schema[]"; \
 
 _generate-json-examples:
     #!/bin/bash
@@ -96,9 +108,9 @@ _post-process-schema:
     yq -i '.annotations.environment = strenv(ENV_URL)' output/schemas/{{name}}.linkml.yml
     yq -i '.generation_date = "{{shell("date -I")}}"' output/schemas/{{name}}.linkml.yml
 
-# Generate and assemble
+# Build processing logic called by Antora Collector.
 [group("development"),private]
-generate-and-assemble: _clean _post-process-schema validate-examples _generate-asciidoc _generate-additional-schemas _generate-json-examples
+_build: _clean _post-process-schema _generate-asciidoc _generate-additional-schemas _generate-json-examples validate-example-data
 
 # Build website locally
 [group("development")]
@@ -122,13 +134,12 @@ serve:
     @echo
     http-serve output/docs/html
 
-# Validate example data against schema
-[group("development")]
-validate-examples:
-    @echo -e "Validating example data…"
-    linkml-validate -s output/schemas/{{name}}.linkml.yml src/examples/*
-
 # Create example data
 [group("development")]
 create-example-data:
+    @echo TODO…
+
+# Validate example data
+[group("development")]
+validate-example-data:
     @echo TODO…
