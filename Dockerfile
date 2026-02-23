@@ -34,6 +34,7 @@ RUN uv pip install --system \
     "linkml-asciidoc-generator @ git+https://github.com/Netbeheer-Nederland/linkml-asciidoc-generator.git@0.7" \
     "gen-linkml-profile @ git+https://github.com/Netbeheer-Nederland/gen-linkml-profile.git@v0.23.0" \
     "check-jsonschema==0.32.0" \
+    "pyshacl==0.31.0" \
     "jinja-cli==1.2.2"
 
 # Install Antora and its dependencies
