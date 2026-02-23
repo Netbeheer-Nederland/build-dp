@@ -1,25 +1,28 @@
-= NBNL Modellen — Dataproducten
+= NBNL build environment for data products 
 
-== Ontwikkel- en bouwomgeving
+== Users
 
+It is recommended to use the `.devcontainer.json` file to run a Dev Container for your modeling work.
 
-=== Publiceren nieuwe versie
+== Developers
 
-Zorg dat je ingelogd bent:
+=== Building and publishing a new version
+
+Ensure you are logged into GHCR:
 
 [source,shell]
 ....
 $ docker login
 ....
 
-Met de repository root als current working directory, bouw de nieuwe image:
+Make sure the current working directory is the repository root. Then, to build the Docker image, run:
 
 [source,shell]
 ....
 $ docker build -t ghcr.io/netbeheer-nederland/build-dp:latest .
 ....
 
-Push de nieuwe image naar GHCR:
+If building has succeeded, push the built image to GHCR:
 
 [source,shell]
 ....
