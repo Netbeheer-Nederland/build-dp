@@ -107,6 +107,21 @@ _create_xrefs:
     fi
 
     # Examples
+    echo -e 'Examples::\n[unstyled]' >> $index_adoc
+    if [ "{{exchange_format}}" == "application/ld+json" ]; then \
+        for example_filepath in $attachments_dir/examples/jsonld/*.jsonld; do \
+            example_resid=${example_filepath#"$attachments_dir"/}; \
+            example_title=$(jq -r '.["dcterms:title"]' $example_filepath); \
+            echo "* xref:schema:attachment\$$example_resid[$example_title]" >> $index_adoc; \
+        done; \
+    elif [ "{{exchange_format}}" == "application/json" ]; then \
+        for example_filepath in $attachments_dir/examples/json/*.json; do \
+            example_resid=${example_filepath#"$attachments_dir"}; \
+            example_title=$(jq -r '.title' $example_filepath); \
+            echo "* xref:schema:attachment\$$example_resid[$example_title]" >> $index_adoc; \
+        done; \
+    fi
+
 
 _assemble-docs: && _create_xrefs
     cp -r output/{examples,model,schemas} output/docs/adoc/modules/schema/attachments/
@@ -156,7 +171,6 @@ _generate-example-data:
     echo -e "Generating example data…"
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_file in src/examples/*.yml; do \
-            [ -f "$example_file" ] || continue; \
             mkdir -p output/examples/jsonld
             example_filename=$(basename $example_file); \
             example_filepath=output/examples/jsonld/${example_filename%.*}.jsonld; \
@@ -168,7 +182,6 @@ _generate-example-data:
         done
     elif [ "{{exchange_format}}" == "application/json" ]; then \
         for example_file in src/examples/*.yml; do \
-            [ -f "$example_file" ] || continue; \
             mkdir -p output/examples/json
             example_filename=$(basename $example_file); \
             example_filepath=output/examples/json/${example_filename%.*}.json; \
@@ -191,13 +204,11 @@ _validate-example-data:
     @echo "Validating example data…"
     @echo
     @if [ "{{exchange_format}}" == "application/ld+json" ]; then \
-        for example_file in output/examples/jsonld/*; do \
-            [ -f "$example_file" ] || continue; \
+        for example_file in output/examples/jsonld/*.jsonld; do \
             pyshacl -s output/schemas/shacl/{{name}}.shacl.ttl -df json-ld -f human $example_file; \
         done; \
     elif [ "{{exchange_format}}" == "application/json" ]; then \
-        for example_file in output/examples/json/*; do \
-            [ -f "$example_file" ] || continue; \
+        for example_file in output/examples/json/*.json; do \
             check-jsonschema --schemafile output/schemas/json_schema/{{name}}.json_schema.json $example_file; \
         done; \
     fi
