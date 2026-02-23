@@ -57,24 +57,22 @@ _generate-additional-schemas:
     echo -e "Generating artifacts…"
 
     cp output/schemas/{{name}}.linkml.yml output/docs/adoc/modules/schema/attachments/
-    for schema in $(yq '.annotations.additional_schemas // ""' output/schemas/{{name}}.linkml.yml); do \
-        if [ $schema == "json-schema" ]; then
-            echo "Generating JSON Schema…"
-            mkdir -p output/schemas/json-schema
-            echo
-            gen-json-schema \
-                --not-closed \
-                output/schemas/{{name}}.linkml.yml \
-                > output/schemas/json-schema/{{name}}.json_schema.json
-            echo "… OK."
-            echo
-            echo "Generated JSON Schema at: output/schemas/json-schema/{{name}}.json_schema.json"
-            echo
-            cp output/schemas/json-schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/
-        fi
-        cp -r output/schemas/json-schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/; \
-        echo -e "To reference use:\n\txref:schema:attachment\$$schema[]"; \
-    done
+    if [ "$(yq '.annotations.additional_schema // ""' output/schemas/{{name}}.linkml.yml)" == "json-schema" ]; then
+        echo "Generating JSON Schema…"
+        mkdir -p output/schemas/json-schema
+        echo
+        gen-json-schema \
+            --not-closed \
+            output/schemas/{{name}}.linkml.yml \
+            > output/schemas/json-schema/{{name}}.json_schema.json
+        echo "… OK."
+        echo
+        echo "Generated JSON Schema at: output/schemas/json-schema/{{name}}.json_schema.json"
+        echo
+        cp output/schemas/json-schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/
+    fi
+    cp -r output/schemas/json-schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/; \
+    echo -e "To reference use:\n\txref:schema:attachment\$$schema[]"; \
 
 _generate-json-examples:
     #!/bin/bash
@@ -123,11 +121,6 @@ serve:
     @echo -e "Serving website from output/docs/html…"
     @echo
     http-serve output/docs/html
-
-# Submit for review to accept changes
-[group("version-control")]
-submit-for-review:
-    @echo TODO…
 
 # Validate example data against schema
 [group("development")]
