@@ -4,6 +4,31 @@
 
 It is recommended to use the `.devcontainer.json` file to run a Dev Container for your modeling work.
 
+=== SSH keys
+
+To use your local SSH keys in the Dev Container, simply run a `ssh-agent` session and add the identities of interest to it.
+
+####
+Start SSH agent session:
+
+[source,shell]
+....
+$ eval $(ssh-agent -s)
+Agent pid 97280
+....
+
+Add your private key:
+
+[source,shell]
+....
+$ ssh-add
+....
+
+Optionally you can pass in the private keys as arguments.
+####
+
+Please consult other resources for more information.
+
 == Developers
 
 === Building and publishing a new version
