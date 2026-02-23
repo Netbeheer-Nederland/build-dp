@@ -148,21 +148,31 @@ _generate-example-data:
     echo -e "Generating example data…"
     mkdir -p output/examples
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
-        ext=jsonld; \
+        for example_file in src/examples/*.yml; do \
+            [ -f "$example_file" ] || continue; \
+            example_filename=$(basename $example_file); \
+            example_filepath=output/examples/${example_filename%.*}.jsonld; \
+            gen-linkml-profile \
+                convert \
+                $example_file \
+                --out $example_filepath; \
+            jq '."dcterms:conformsTo" = [{"@id": "{{schema_id}}"}]' $example_filepath | sponge $example_filepath; \
+        done
     elif [ "{{exchange_format}}" == "application/json" ]; then \
-        ext=json; \
+        for example_file in src/examples/*.yml; do \
+            [ -f "$example_file" ] || continue; \
+            example_filename=$(basename $example_file); \
+            example_filepath=output/examples/${example_filename%.*}.json; \
+            gen-linkml-profile \
+                convert \
+                $example_file \
+                --out $example_filepath; \
+            jq '.conforms_to = "{{schema_id}}"' $example_filepath | sponge $example_filepath; \
+        done
     else \
         echo "No validation checks to run."
         exit 0
     fi
-    for example_file in src/examples/*.yml; do \
-        [ -f "$example_file" ] || continue; \
-        example_name=$(basename $example_file); \
-        gen-linkml-profile \
-            convert \
-            $example_file \
-            --out "output/examples/${example_name%.*}.$ext"; \
-    done
     echo "… OK."
     echo
     echo -e "Generated example data at: output/examples"
