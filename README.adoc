@@ -8,9 +8,11 @@ It is recommended to use the `.devcontainer.json` file to run a Dev Container fo
 
 To use your local SSH keys in the Dev Container, simply run a `ssh-agent` session and add the identities of interest to it.
 
-[example]
-====
-Start SSH agent session:
+'''
+
+==== Example
+
+Start an SSH agent session:
 
 [source,shell]
 ....
@@ -26,7 +28,8 @@ $ ssh-add
 ....
 
 Optionally you can pass in the private keys as arguments.
-====
+
+'''
 
 Please consult other resources for more information.
 
