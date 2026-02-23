@@ -85,23 +85,31 @@ _generate-schemas:
     fi
 
 _create_xrefs:
-    @echo TODO…
-    #echo "You can include the artifacts in your documentation using the following xrefs statements:"
-    #echo -e \txref:schema:attachment\${{name}}.linkml.yml >> $xrefs_file
-    #for attachment_file in output/docs/adoc/modules/schema/attachments/*; do \
-    #    attachment_name=$(basename $attachment_file); \
-    #    echo -e xref:schema:attachment\$$attachment_name; \
-    #done
+    #!/bin/bash
+    index_adoc=output/docs/adoc/modules/ROOT/pages/index.adoc
+    attachments_dir=output/docs/adoc/modules/schema/attachments
+    shacl_resid=schemas/shacl/{{name}}.shacl.ttl
+    json_schema_resid=schemas/json_schema/{{name}}.json_schema.json
+
+    echo -e '\n\n== Artifacts\n\n' >> $index_adoc
+
+    # LinkML model
+    echo -e 'Model::\n[unstyled]' >> $index_adoc
+    echo '* xref:schema:attachment$model/{{name}}.linkml.yml[LinkML] (normative)' >> $index_adoc
+
+    # Schemas
+    echo -e 'Schemas::\n[unstyled]' >> $index_adoc
+
+    if [ -f $attachments_dir/$shacl_resid ]; then \
+        echo "* xref:schema:attachment\$$shacl_resid[SHACL]" >> $index_adoc; \
+    elif [ -f $attachments_dir/$json_schema_resid ]; then \
+        echo "* xref:schema:attachment\$$json_schema_resid[JSON Schema]" >> $index_adoc; \
+    fi
+
+    # Examples
 
 _assemble-docs: && _create_xrefs
-    cp output/model/{{name}}.linkml.yml output/docs/adoc/modules/schema/attachments/
-    if [ "{{exchange_format}}" == "application/ld+json" ]; then \
-        cp output/examples/*.jsonld output/docs/adoc/modules/schema/attachments/; \
-        cp output/schemas/shacl/{{name}}.shacl.ttl output/docs/adoc/modules/schema/attachments/; \
-    elif [ "{{exchange_format}}" == "application/json" ]; then \
-        cp output/examples/*.json output/docs/adoc/modules/schema/attachments/; \
-        cp output/schemas/json_schema/{{name}}.json_schema.json output/docs/adoc/modules/schema/attachments/; \
-    fi
+    cp -r output/{examples,model,schemas} output/docs/adoc/modules/schema/attachments/
 
 _post-process-schema:
     mkdir -p output/model
@@ -146,12 +154,12 @@ _generate-example-data:
     #!/bin/bash
     set shopt -e
     echo -e "Generating example data…"
-    mkdir -p output/examples
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_file in src/examples/*.yml; do \
             [ -f "$example_file" ] || continue; \
+            mkdir -p output/examples/jsonld
             example_filename=$(basename $example_file); \
-            example_filepath=output/examples/${example_filename%.*}.jsonld; \
+            example_filepath=output/examples/jsonld/${example_filename%.*}.jsonld; \
             gen-linkml-profile \
                 convert \
                 $example_file \
@@ -161,8 +169,9 @@ _generate-example-data:
     elif [ "{{exchange_format}}" == "application/json" ]; then \
         for example_file in src/examples/*.yml; do \
             [ -f "$example_file" ] || continue; \
+            mkdir -p output/examples/json
             example_filename=$(basename $example_file); \
-            example_filepath=output/examples/${example_filename%.*}.json; \
+            example_filepath=output/examples/json/${example_filename%.*}.json; \
             gen-linkml-profile \
                 convert \
                 $example_file \
@@ -182,12 +191,12 @@ _validate-example-data:
     @echo "Validating example data…"
     @echo
     @if [ "{{exchange_format}}" == "application/ld+json" ]; then \
-        for example_file in output/examples/*; do \
+        for example_file in output/examples/jsonld/*; do \
             [ -f "$example_file" ] || continue; \
             pyshacl -s output/schemas/shacl/{{name}}.shacl.ttl -df json-ld -f human $example_file; \
         done; \
     elif [ "{{exchange_format}}" == "application/json" ]; then \
-        for example_file in output/examples/*; do \
+        for example_file in output/examples/json/*; do \
             [ -f "$example_file" ] || continue; \
             check-jsonschema --schemafile output/schemas/json_schema/{{name}}.json_schema.json $example_file; \
         done; \
