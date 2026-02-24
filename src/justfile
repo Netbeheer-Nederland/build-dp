@@ -1,11 +1,12 @@
 set shell := ["bash", "-uc"]
-name := shell("yq .name src/model/*.linkml.yml | tr '-' '_'")
+name := shell("yq .name src/model/*.linkml.yml")
+fname := replace(name, "-", "_")
 title := shell("yq .title ./src/model/*.linkml.yml")
 site_title := shell("yq .title src/model/*.linkml.yml")
 ref_name := env("REF_NAME", shell("git rev-parse --abbrev-ref HEAD")) 
 version := if ref_name == "main" { "upcoming" } else { ref_name }
 schema_id := "https://modellen.netbeheernederland.nl/" + name + "/" + version
-exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/" + name + ".linkml.yml")
+exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/" + fname + ".linkml.yml")
 
 _default:
     @just --list --unsorted --justfile {{justfile()}}
@@ -42,7 +43,7 @@ _generate-asciidoc:
         -o output/docs/adoc/modules/schema \
         -t /opt/build/templates \
         --render-diagrams \
-        output/model/{{name}}.linkml.yml
+        output/model/{{replace(name, "-", "_")}}.linkml.yml
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
     echo 'Setting `version` key…'
@@ -64,11 +65,11 @@ _generate-schemas:
         echo; \
         gen-json-schema \
             --not-closed \
-            output/model/{{name}}.linkml.yml \
-            > output/schemas/json_schema/{{name}}.json_schema.json; \
+            output/model/{{fname}}.linkml.yml \
+            > output/schemas/json_schema/{{fname}}.json_schema.json; \
         echo "… OK."; \
         echo; \
-        echo "Generated JSON Schema at: output/schemas/json_schema/{{name}}.json_schema.json"; \
+        echo "Generated JSON Schema at: output/schemas/json_schema/{{fname}}.json_schema.json"; \
         echo; \
     elif [ "{{exchange_format}}" == "application/ld+json" ]; then \
         echo "Generating SHACL…"; \
@@ -76,11 +77,11 @@ _generate-schemas:
         echo; \
         gen-shacl \
             --non-closed \
-            output/model/{{name}}.linkml.yml \
-            > output/schemas/shacl/{{name}}.shacl.ttl; \
+            output/model/{{fname}}.linkml.yml \
+            > output/schemas/shacl/{{fname}}.shacl.ttl; \
         echo "… OK."; \
         echo; \
-        echo "Generated SHACL schema at: output/schemas/shacl/{{name}}.shacl.ttl"; \
+        echo "Generated SHACL schema at: output/schemas/shacl/{{fname}}.shacl.ttl"; \
         echo; \
     fi
 
@@ -88,14 +89,14 @@ _create_xrefs:
     #!/bin/bash
     index_adoc=output/docs/adoc/modules/ROOT/pages/index.adoc
     attachments_dir=output/docs/adoc/modules/schema/attachments
-    shacl_resid=schemas/shacl/{{name}}.shacl.ttl
-    json_schema_resid=schemas/json_schema/{{name}}.json_schema.json
+    shacl_resid=schemas/shacl/{{fname}}.shacl.ttl
+    json_schema_resid=schemas/json_schema/{{fname}}.json_schema.json
 
     echo -e '\n\n== Artifacts\n\n' >> $index_adoc
 
     # LinkML model
     echo -e 'Model::\n[unstyled]' >> $index_adoc
-    echo '* xref:schema:attachment$model/{{name}}.linkml.yml[LinkML] (normative)' >> $index_adoc
+    echo '* xref:schema:attachment$model/{{fname}}.linkml.yml[LinkML] (normative)' >> $index_adoc
 
     # Schemas
     echo -e 'Schemas::\n[unstyled]' >> $index_adoc
@@ -128,11 +129,11 @@ _assemble-docs: && _create_xrefs
 
 _post-process-schema:
     mkdir -p output/model
-    cp src/model/{{name}}.linkml.yml output/model/{{name}}.linkml.yml
-    yq -i '.version = "{{version}}"' output/model/{{name}}.linkml.yml
-    yq -i '.id = "{{schema_id}}"' output/model/{{name}}.linkml.yml
-    yq -i '.annotations.environment = strenv(ENV_URL)' output/model/{{name}}.linkml.yml
-    yq -i '.generation_date = "{{shell("date -I")}}"' output/model/{{name}}.linkml.yml
+    cp src/model/{{fname}}.linkml.yml output/model/{{fname}}.linkml.yml
+    yq -i '.version = "{{version}}"' output/model/{{fname}}.linkml.yml
+    yq -i '.id = "{{schema_id}}"' output/model/{{fname}}.linkml.yml
+    yq -i '.annotations.environment = strenv(ENV_URL)' output/model/{{fname}}.linkml.yml
+    yq -i '.generation_date = "{{shell("date -I")}}"' output/model/{{fname}}.linkml.yml
 
 # Build processing logic called by Antora Collector.
 [group("development")]
@@ -143,7 +144,7 @@ _build: _clean _post-process-schema _generate-asciidoc _generate-schemas _genera
 build: 
     @echo "Generating site using Antora…"
     @if [ $CI == "true" ]; then \
-        jinja -D site_url https://modellen.netbeheernederland.nl/{{name}} -D site_title "{{site_title}}" /opt/build/antora/antora-playbook.yml.jinja > /tmp/antora-playbook.yml; \
+        jinja -D site_url "{{schema_id}}" -D site_title "{{site_title}}" /opt/build/antora/antora-playbook.yml.jinja > /tmp/antora-playbook.yml; \
         antora --fetch /tmp/antora-playbook.yml; \
     else \
         jinja -D site_url http://localhost:8080 -D site_title "{{site_title}}" /opt/build/antora/antora-playbook.local.yml.jinja > /tmp/antora-playbook.local.yml; \
@@ -205,11 +206,11 @@ _validate-example-data:
     @echo
     @if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_file in output/examples/jsonld/*.jsonld; do \
-            pyshacl -s output/schemas/shacl/{{name}}.shacl.ttl -df json-ld -f human $example_file; \
+            pyshacl -s output/schemas/shacl/{{fname}}.shacl.ttl -df json-ld -f human $example_file; \
         done; \
     elif [ "{{exchange_format}}" == "application/json" ]; then \
         for example_file in output/examples/json/*.json; do \
-            check-jsonschema --schemafile output/schemas/json_schema/{{name}}.json_schema.json $example_file; \
+            check-jsonschema --schemafile output/schemas/json_schema/{{fname}}.json_schema.json $example_file; \
         done; \
     fi
     @echo
