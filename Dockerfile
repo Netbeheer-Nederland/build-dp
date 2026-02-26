@@ -20,7 +20,7 @@ RUN apk add --no-cache \
     nodejs=24.13.0-r1 \
     npm=11.6.3-r0 \
     uv=0.10.2-r0 \
-    just==1.43.1-r0 \
+    just=1.43.1-r0 \
     github-cli=2.83.0-r3 \
     openssh=10.2_p1-r0 \
     tar=1.35-r4 \
@@ -43,13 +43,13 @@ RUN uv pip install --system \
 RUN npm i -g \
     http-serve@1.0.1 \
     @antora/cli@3.1.9 \
-    @antora/lunr-extension@^1.0.0-alpha.8 \
+    @antora/lunr-extension@1.0.0-alpha.8 \
     @antora/site-generator@3.1.9 \
-    @antora/collector-extension@^1.0.2 \
-    @mermaid-js/mermaid-cli@^11.4.2 \
-    asciidoctor-kroki@^0.18.1 \
-    @asciidoctor/reveal.js@^5.2.0 \
-    js-yaml@^4.1.1
+    @antora/collector-extension@1.0.2 \
+    @mermaid-js/mermaid-cli@11.4.2 \
+    asciidoctor-kroki@0.18.1 \
+    @asciidoctor/reveal.js@5.2.0 \
+    js-yaml@4.1.1
 
 # Install Mike Farah's yq
 RUN wget https://github.com/mikefarah/yq/releases/download/v4.52.2/yq_linux_amd64 -O /usr/local/bin/yq \
