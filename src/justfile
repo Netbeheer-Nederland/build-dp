@@ -87,6 +87,7 @@ _generate-schemas:
 
 _create_xrefs:
     #!/bin/bash
+    shopt -s nullglob
     index_adoc=output/docs/adoc/modules/ROOT/pages/index.adoc
     attachments_dir=output/docs/adoc/modules/schema/attachments
     shacl_resid=schemas/shacl/{{fname}}.shacl.ttl
@@ -169,6 +170,7 @@ serve:
 _generate-example-data:
     #!/bin/bash
     set shopt -e
+    shopt -s nullglob
     echo -e "Generating example data…"
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_file in src/examples/*.yml; do \
@@ -202,9 +204,11 @@ _generate-example-data:
     echo
 
 _validate-example-data:
-    @echo "Validating example data…"
-    @echo
-    @if [ "{{exchange_format}}" == "application/ld+json" ]; then \
+    #!/bin/bash
+    shopt -s nullglob
+    echo "Validating example data…"
+    echo
+    if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_file in output/examples/jsonld/*.jsonld; do \
             pyshacl -s output/schemas/shacl/{{fname}}.shacl.ttl -df json-ld -f human $example_file; \
         done; \
@@ -213,7 +217,7 @@ _validate-example-data:
             check-jsonschema --schemafile output/schemas/json_schema/{{fname}}.json_schema.json $example_file; \
         done; \
     fi
-    @echo
+    echo
 
 # Validate example data
 [group("examples")]
