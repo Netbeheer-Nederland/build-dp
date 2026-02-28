@@ -7,6 +7,8 @@ ENV NODE_PATH=/usr/lib/node_modules
 ENV SCRIPTS=/opt/build
 ENV SHELL=/bin/bash
 ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.11
+ENV PATH=$PATH:/opt/build
+
 
 # Whether in CI/CD pipeline or not. Overridden by GitHub Actions if running there.
 ENV CI=false
@@ -32,12 +34,13 @@ SHELL ["/bin/bash", "-c"]
 
 # Install Python project dependencies
 RUN uv pip install --system \
-    "linkml==1.9.6" \
+    "linkml==1.10.0" \
     "linkml-asciidoc-generator @ git+https://github.com/Netbeheer-Nederland/linkml-asciidoc-generator.git@0.7" \
     "gen-linkml-profile @ git+https://github.com/Netbeheer-Nederland/gen-linkml-profile.git@v0.30.1" \
     "check-jsonschema==0.32.0" \
     "pyshacl==0.31.0" \
-    "jinja-cli==1.2.2"
+    "jinja-cli==1.2.2" \
+    "copier==9.12.0"
 
 # Install Antora and its dependencies
 RUN npm i -g \

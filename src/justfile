@@ -1,4 +1,5 @@
 set shell := ["bash", "-uc"]
+
 name := shell("yq .name src/model/*.linkml.yml")
 fname := replace(name, "-", "_")
 title := shell("yq .title ./src/model/*.linkml.yml")
@@ -6,7 +7,7 @@ site_title := shell("yq .title src/model/*.linkml.yml")
 ref_name := env("REF_NAME", shell("git rev-parse --abbrev-ref HEAD")) 
 version := if ref_name == "main" { "upcoming" } else { ref_name }
 schema_id := "https://modellen.netbeheernederland.nl/" + name + "/" + version
-exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/" + fname + ".linkml.yml")
+exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/*.linkml.yml")
 
 _default:
     @just --list --unsorted --justfile {{justfile()}}
@@ -109,7 +110,7 @@ _create_xrefs:
     fi
 
     # Examples
-    echo -e 'Examples::\n[unstyled]' >> $index_adoc
+    [ ! -d $attachments_dir/examples ] || echo -e 'Examples::\n[unstyled]' >> $index_adoc
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_filepath in $attachments_dir/examples/jsonld/*.jsonld; do \
             example_resid=${example_filepath#"$attachments_dir"/}; \
@@ -124,9 +125,10 @@ _create_xrefs:
         done; \
     fi
 
-
 _assemble-docs: && _create_xrefs
-    cp -r output/{examples,model,schemas} output/docs/adoc/modules/schema/attachments/
+    cp -r output/model output/docs/adoc/modules/schema/attachments/
+    [ ! -d output/schemas ] || cp -r output/schemas output/docs/adoc/modules/schema/attachments/
+    [ ! -d output/examples ] || cp -r output/examples output/docs/adoc/modules/schema/attachments/
 
 _post-process-schema:
     mkdir -p output/model
@@ -222,3 +224,8 @@ _validate-example-data:
 # Validate example data
 [group("examples")]
 validate-example-data: _clean _post-process-schema _generate-schemas _generate-example-data _validate-example-data
+
+# Update project structure to conform to latest version of template
+[group("project")]
+update-project:
+    copier update
