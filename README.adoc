@@ -2,7 +2,18 @@
 
 == Users
 
-It is recommended to use the `.devcontainer.json` file to run a Dev Container for your modeling work.
+It is recommended to use a Dev Container to do your modeling work.
+
+To this end, make a copy of `.devcontainer.example.json`, call it `.devcontainer.json` and place it in a directory which contains all of the data product model repositories you're working on. Feel free to tweak the file to your liking, but be cautious with meddling with the AsciiDoc related settings.
+
+=== GitHub CLI
+
+To be able to use the GitHub CLI client `gh`, you have two options:
+
+1. Create a (classic) PAT (_Personal Access Token_) on GitHub, and make the token available in the container through the `GH_TOKEN` environment variable.
+2. Log in from the container using `gh auth login`. This is not recommended, since the session will likely not persist.
+
+CAUTION: The `create-project` script relies on the use of `gh` and therefore requires this authentication.
 
 === SSH keys
 
