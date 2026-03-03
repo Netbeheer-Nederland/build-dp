@@ -17,7 +17,7 @@ git init -b main
 git add . .github .gitignore .copier-answers.yml
 git commit -m "Initial commit"
 gh repo new $ORG/$name \
-    --description $(yq '.description' .copier-answers.yml) \
+    --description "$(yq '.description' .copier-answers.yml)" \
     --disable-wiki \
     --homepage $BASE_URI/$name \
     --public \
