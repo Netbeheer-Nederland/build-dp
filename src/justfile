@@ -98,7 +98,7 @@ _create_xrefs:
 
     # LinkML model
     echo -e 'Model::\n[unstyled]' >> $index_adoc
-    echo '* xref:schema:attachment$model/{{fname}}.linkml.yml[LinkML] (normative)' >> $index_adoc
+    echo '* xref:schema:attachment$model/{{fname}}.linkml.yml[LinkML]' >> $index_adoc
 
     # Schemas
     echo -e 'Schemas::\n[unstyled]' >> $index_adoc
