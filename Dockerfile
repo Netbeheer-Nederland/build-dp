@@ -15,7 +15,7 @@ ENV CI=false
 
 # Install required packages
 RUN apk add --no-cache \
-    vim=9.1.2132-r0 \
+    vim=9.2.0078-r0 \
     bash=5.3.3-r1 \
     bc=1.08.2-r0 \
     git=2.52.0-r0 \
