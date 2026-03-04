@@ -1,5 +1,5 @@
 {
-  "name": "NBNL Dev Container",
+  "name": "NBNL Data Products",
   "image": "ghcr.io/netbeheer-nederland/build-dp:latest",
   "mounts": [
     "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind"
