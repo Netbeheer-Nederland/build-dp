@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 ENV NODE_PATH=/usr/lib/node_modules
 ENV SCRIPTS=/opt/build
 ENV SHELL=/bin/bash
-ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.11
+ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.30
 ENV PATH=$PATH:/opt/build
 
 
