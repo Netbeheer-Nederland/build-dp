@@ -148,7 +148,7 @@ _post-process-schema:
 [group("development")]
 _build: _clean _post-process-schema _generate-asciidoc _generate-schemas _generate-example-data _assemble-docs _validate-example-data
 
-# Build website locally
+# Build website
 [group("development")]
 build: 
     @echo "Generating site using Antora…"

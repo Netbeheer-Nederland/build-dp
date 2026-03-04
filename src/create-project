@@ -43,6 +43,7 @@ fi
 git remote add origin $remoteUrl
 git push -u origin main
 
+# Set up GitHub Pages from Actions
 gh api \
   --method POST \
   -H "Accept: application/vnd.github+json" \
