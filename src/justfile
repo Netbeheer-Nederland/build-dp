@@ -24,9 +24,15 @@ _clean target="":
     echo "… OK."
     echo
 
-# Build and serve website locally
+# Build work and serve website locally
 [group("development")]
 preview: build serve
+
+# Build all versions as in CI/CD pipeline and serve website locally
+[group("development")]
+preview-production: && serve
+    #!/bin/bash
+    CI=true just build
 
 _generate-asciidoc:
     #!/bin/bash
