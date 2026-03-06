@@ -83,7 +83,7 @@ _generate-schemas:
         mkdir -p output/schemas/shacl; \
         echo; \
         gen-shacl \
-            --non-closed \
+            --closed \
             output/model/{{fname}}.linkml.yml \
             > output/schemas/shacl/{{fname}}.shacl.ttl; \
         echo "… OK."; \
