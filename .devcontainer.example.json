@@ -5,6 +5,7 @@
     "source=${localEnv:SSH_AUTH_SOCK},target=/ssh-agent,type=bind"
   ],
   "remoteUser": "developer",
+  "runArgs": ["--env-file", ".env"],
   "customizations": {
     "vscode": {
       "extensions": [
