@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 ENV NODE_PATH=/usr/lib/node_modules
 ENV SCRIPTS=/opt/build
 ENV SHELL=/bin/bash
-ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.31
+ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.32
 ENV PATH=$PATH:/opt/build
 
 
@@ -63,7 +63,7 @@ RUN mkdir -p $SCRIPTS
 COPY src $SCRIPTS/
 
 # Get Antora UI files
-RUN wget https://github.com/Netbeheer-Nederland/antora-ui/archive/refs/tags/0.20.tar.gz -O antora-ui.tar.gz \
+RUN wget https://github.com/Netbeheer-Nederland/antora-ui/archive/refs/tags/0.30.tar.gz -O antora-ui.tar.gz \
     && tar -xvzf antora-ui.tar.gz
 RUN cp -r antora-ui-*/supplemental-ui $SCRIPTS/antora/
 
