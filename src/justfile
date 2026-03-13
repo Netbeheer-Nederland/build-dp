@@ -5,7 +5,8 @@ fname := replace(name, "-", "_")
 title := shell("yq .title ./src/model/*.linkml.yml")
 site_title := shell("yq .title src/model/*.linkml.yml")
 ref_name := env("REF_NAME", shell("git rev-parse --abbrev-ref HEAD")) 
-version := if ref_name == "main" { "upcoming" } else { ref_name }
+#version := if ref_name == "main" { "upcoming" } else { ref_name }
+version := ref_name
 schema_id := "https://modellen.netbeheernederland.nl/" + name + "/" + version
 exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/*.linkml.yml")
 
