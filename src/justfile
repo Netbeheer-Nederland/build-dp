@@ -41,6 +41,7 @@ _generate-asciidoc:
     echo -e "Generating documentation (AsciiDoc)…"
     mkdir -p output/docs/adoc
     cp -r src/docs/* output/docs/adoc
+    touch output/docs/adoc/modules/ROOT/nav.adoc
     yq -i 'del(.version)' output/docs/adoc/antora.yml
     yq -i '.title = "{{title}}"' output/docs/adoc/antora.yml
     echo
