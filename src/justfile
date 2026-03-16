@@ -5,9 +5,9 @@ fname := replace(name, "-", "_")
 title := shell("yq .title ./src/model/*.linkml.yml")
 site_title := shell("yq .title src/model/*.linkml.yml")
 ref_name := env("REF_NAME", shell("git rev-parse --abbrev-ref HEAD")) 
-#version := if ref_name == "main" { "upcoming" } else { ref_name }
 version := ref_name
-schema_id := "https://modellen.netbeheernederland.nl/" + name + "/" + version
+base_uri := "https://modellen.netbeheernederland.nl"
+schema_id := base_uri + "/" + name + "/" + version
 exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/*.linkml.yml")
 
 _default:
@@ -155,7 +155,7 @@ _build: _clean _post-process-schema _generate-asciidoc _generate-schemas _genera
 build: 
     @echo "Generating site using Antora…"
     @if [ $CI == "true" ]; then \
-        jinja -D site_url "{{schema_id}}" -D site_title "{{site_title}}" /opt/build/antora/antora-playbook.yml.jinja > /tmp/antora-playbook.yml; \
+        jinja -D site_url "{{base_uri}}/{{name}}" -D site_title "{{site_title}}" /opt/build/antora/antora-playbook.yml.jinja > /tmp/antora-playbook.yml; \
         antora --fetch /tmp/antora-playbook.yml; \
     else \
         jinja -D site_url http://localhost:8080 -D site_title "{{site_title}}" /opt/build/antora/antora-playbook.local.yml.jinja > /tmp/antora-playbook.local.yml; \
