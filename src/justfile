@@ -58,7 +58,7 @@ _generate-asciidoc:
     echo 'Setting `version` key…'
     yq -i '.version = "{{version}}"' output/docs/adoc/antora.yml; \
     echo 'Setting `prerelease` key if applicable…'
-    if [[ "{{ref_name}}" == "main" || "{{ref_name}}" == "draft" ]]; then \
+    if ! [[ "{{ref_name}}" =~ ^[1-9][0-9]*\.[0-9]+$ ]]; then \
         yq -i '.prerelease = true' output/docs/adoc/antora.yml; \
     fi
     echo

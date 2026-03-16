@@ -1,6 +1,7 @@
 site:
   title: NBNL Modellen — {{ site_title }}
   url: {{ site_url }}
+  start_page: ROOT::index.adoc
 content:
   sources:
     - url: ''
@@ -17,6 +18,8 @@ asciidoc:
 output:
   clean: true
   dir: output/docs/html
+urls:
+  latest_version_segment: ''
 ui:
   bundle:
     url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
