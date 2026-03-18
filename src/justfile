@@ -237,3 +237,29 @@ validate-example-data: _clean _post-process-schema _generate-schemas _generate-e
 [group("project")]
 update-project:
     copier update
+
+# Create new draft
+[group("version-control")]
+create-draft draft-name:
+    @echo "Creating and tracking new draft branch…"
+    @echo
+    git checkout -b draft/{{draft-name}}
+    git commit --allow-empty -m "Start working on draft"
+    git push -u origin draft/{{draft-name}}
+    @echo
+    @echo "Creating new draft pull request…"
+    @echo
+    gh pr create --base main --draft
+    @echo "… OK."
+    @echo
+
+# Finish draft
+[group("version-control")]
+finish-draft:
+    @echo "Finishing draft…"
+    @echo
+    @echo "Marking draft pull request as ready for review…"
+    @echo
+    gh pr ready
+    @echo "… OK."
+    @echo
