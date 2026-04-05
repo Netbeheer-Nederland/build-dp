@@ -24,9 +24,8 @@ output:
   dir: output/docs/html
 ui:
   bundle:
-    url: https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable
-    snapshot: true
-  supplemental_files: /opt/build/antora/supplemental-ui/default
+    url: https://github.com/Netbeheer-Nederland/antora-nbnl-ui/releases/download/1.0/ui-bundle.zip
+  default_layout: {% if has_nav == "false" %}single-page{% else %}default{% endif %}
 antora:
   extensions:
     - require: '/opt/build/antora/add-collector-config.js'
