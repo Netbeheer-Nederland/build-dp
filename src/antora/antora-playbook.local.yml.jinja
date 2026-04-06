@@ -18,6 +18,8 @@ asciidoc:
 output:
   clean: true
   dir: output/docs/html
+urls:
+  latest_version_segment: ''
 ui:
   bundle:
     url: https://github.com/Netbeheer-Nederland/antora-nbnl-ui/releases/download/1.0/ui-bundle.zip
@@ -26,4 +28,5 @@ antora:
   extensions:
     - require: '/opt/build/antora/add-collector-config.js'
     - require: '@antora/collector-extension'
+    - require: '/opt/build/antora/version-postprocessor.js'
     - require: '@antora/lunr-extension'
