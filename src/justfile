@@ -6,7 +6,7 @@ title := shell("yq .title ./src/model/*.linkml.yml")
 site_title := shell("yq .title src/model/*.linkml.yml")
 has_nav := shell("yq '.nav // [] | any' src/docs/antora.yml")
 ref_name := env("REF_NAME", shell("git rev-parse --abbrev-ref HEAD")) 
-version := replace(ref_name, "/", "-")
+version := if version == "main" { "upcoming" } else { replace(ref_name, "/", "-") }  # draft/ -> draft-
 base_uri := "https://modellen.netbeheernederland.nl"
 schema_id := base_uri + "/" + name + "/" + version
 exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/*.linkml.yml")
@@ -60,7 +60,7 @@ _generate-asciidoc:
     echo 'Setting `version` key…'
     yq -i '.version = "{{version}}"' output/docs/adoc/antora.yml; \
     echo 'Setting `prerelease` key if applicable…'
-    if ! [[ "{{ref_name}}" =~ ^[1-9][0-9]*\.[0-9]+$ ]]; then \
+    if ! [[ "{{version}}" =~ ^[1-9][0-9]*\.[0-9]+$ ]]; then \
         yq -i '.prerelease = true' output/docs/adoc/antora.yml; \
     fi
     echo
