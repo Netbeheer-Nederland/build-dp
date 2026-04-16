@@ -39,7 +39,8 @@ RUN uv pip install --system \
     "check-jsonschema==0.32.0" \
     "pyshacl==0.31.0" \
     "jinja-cli==1.2.2" \
-    "copier==9.12.0"
+    "copier==9.12.0" \
+    "csvkit==2.2.0"
 
 # Install Antora and its dependencies
 RUN npm i -g \
