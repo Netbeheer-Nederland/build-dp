@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 ENV NODE_PATH=/usr/lib/node_modules
 ENV SCRIPTS=/opt/build
 ENV SHELL=/bin/bash
-ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.37
+ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.38
 ENV PATH=$PATH:/opt/build
 
 # Whether in CI/CD pipeline or not. Overridden by GitHub Actions if running there.
@@ -14,7 +14,7 @@ ENV CI=false
 
 # Install required packages
 RUN apk add --no-cache \
-    vim=9.2.0321-r0 \
+    vim=9.2.0452-r0 \
     bash=5.3.3-r1 \
     bc=1.08.2-r0 \
     git=2.52.0-r0 \
@@ -52,7 +52,6 @@ RUN npm i -g \
     @mermaid-js/mermaid-cli@11.4.2 \
     asciidoctor-kroki@0.18.1 \
     @asciidoctor/reveal.js@5.2.0 \
-    @djencks/asciidoctor-mathjax \
     js-yaml@4.1.1
 
 # Install Mike Farah's yq
