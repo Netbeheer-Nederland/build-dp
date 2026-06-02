@@ -55,7 +55,7 @@ _generate-asciidoc:
         -o output/docs/adoc/modules/schema \
         -t /opt/build/templates \
         --render-diagrams \
-        output/model/{{replace(name, "-", "_")}}.linkml.yml
+        output/model/{{fname_with_ver}}.linkml.yml
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
     echo 'Setting `version` key…'
