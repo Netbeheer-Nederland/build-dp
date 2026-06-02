@@ -189,7 +189,7 @@ _generate-example-data:
         for example_file in src/examples/*.yml; do \
             mkdir -p output/examples/jsonld
             example_filename=$(basename $example_file); \
-            example_filepath=output/examples/jsonld/${example_filename%.*}.jsonld; \
+            example_filepath=output/examples/jsonld/${example_filename%.*}_{{version}}.jsonld; \
             gen-linkml-profile \
                 convert \
                 $example_file \
@@ -200,7 +200,7 @@ _generate-example-data:
         for example_file in src/examples/*.yml; do \
             mkdir -p output/examples/json
             example_filename=$(basename $example_file); \
-            example_filepath=output/examples/json/${example_filename%.*}.json; \
+            example_filepath=output/examples/json/${example_filename%.*}_{{version}}.json; \
             gen-linkml-profile \
                 convert \
                 $example_file \
