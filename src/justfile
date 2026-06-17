@@ -79,9 +79,10 @@ _generate-schemas:
             --not-closed \
             output/model/{{fname_with_ver}}.linkml.yml \
             > output/schemas/json_schema/{{fname_with_ver}}.json_schema.json; \
+        cp output/schemas/json_schema/{{fname_with_ver}}.json_schema.json output/schemas/json_schema/{{fname}}.json_schema.json; \
         echo "… OK."; \
         echo; \
-        echo "Generated JSON Schema at: output/schemas/json_schema/{{fname_with_ver}}.json_schema.json"; \
+        echo "Generated JSON Schema files at: output/schemas/json_schema/"; \
         echo; \
     elif [ "{{exchange_format}}" == "application/ld+json" ]; then \
         echo "Generating SHACL…"; \
@@ -91,9 +92,10 @@ _generate-schemas:
             --closed \
             output/model/{{fname_with_ver}}.linkml.yml \
             > output/schemas/shacl/{{fname_with_ver}}.shacl.ttl; \
+        cp output/schemas/shacl/{{fname_with_ver}}.shacl.ttl output/schemas/shacl/{{fname}}.shacl.ttl; \
         echo "… OK."; \
         echo; \
-        echo "Generated SHACL schema at: output/schemas/shacl/{{fname_with_ver}}.shacl.ttl"; \
+        echo "Generated SHACL schema files at: output/schemas/shacl/"; \
         echo; \
     fi
 
@@ -144,6 +146,7 @@ _assemble-docs: && _create_xrefs
 _post-process-schema:
     mkdir -p output/model
     cp src/model/{{fname}}.linkml.yml output/model/{{fname_with_ver}}.linkml.yml
+    cp src/model/{{fname}}.linkml.yml output/model/{{fname}}.linkml.yml  # NOTE: This supports referencing the file with or without version number in its name.
     yq -i '.version = "{{version}}"' output/model/{{fname_with_ver}}.linkml.yml
     yq -i '.id = "{{schema_id}}"' output/model/{{fname_with_ver}}.linkml.yml
     yq -i '.annotations.environment = strenv(ENV_URL)' output/model/{{fname_with_ver}}.linkml.yml
@@ -194,6 +197,7 @@ _generate-example-data:
                 convert \
                 $example_file \
                 --out $example_filepath; \
+            cp $example_filepath output/examples/jsonld/${example_filename%.*}.jsonld; \
             jq '."dcterms:conformsTo" = [{"@id": "{{schema_id}}"}]' $example_filepath | sponge $example_filepath; \
         done
     elif [ "{{exchange_format}}" == "application/json" ]; then \
@@ -205,6 +209,7 @@ _generate-example-data:
                 convert \
                 $example_file \
                 --out $example_filepath; \
+            cp $example_filepath output/examples/json/${example_filename%.*}.json; \
             jq '.conforms_to = "{{schema_id}}"' $example_filepath | sponge $example_filepath; \
         done
     else \
