@@ -6,7 +6,7 @@ ENV PYTHONUNBUFFERED=1
 ENV NODE_PATH=/usr/lib/node_modules
 ENV SCRIPTS=/opt/build
 ENV SHELL=/bin/bash
-ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.39
+ENV ENV_URL=https://ghcr.io/netbeheer-nederland/build-dp:0.40
 ENV PATH=$PATH:/opt/build
 
 # Whether in CI/CD pipeline or not. Overridden by GitHub Actions if running there.
@@ -14,7 +14,7 @@ ENV CI=false
 
 # Install required packages
 RUN apk add --no-cache \
-    vim=9.2.0567-r0 \
+    vim=9.2.0602-r0 \
     bash=5.3.3-r1 \
     bc=1.08.2-r0 \
     git=2.52.0-r0 \
