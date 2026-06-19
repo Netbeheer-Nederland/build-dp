@@ -7,7 +7,6 @@ site_title := shell("yq .title src/model/*.linkml.yml")
 has_nav := shell("yq '.nav // [] | any' src/docs/antora.yml")
 ref_name := env("REF_NAME", shell("git rev-parse --abbrev-ref HEAD")) 
 version := if ref_name == "main" { "upcoming" } else { replace(ref_name, "/", "-") }  # draft/ -> draft-
-fname_with_ver := fname + "_" + version
 base_uri := "https://modellen.netbeheernederland.nl"
 schema_id := base_uri + "/" + name + "/" + version
 exchange_format := shell("yq '.annotations.exchange_format // \"\"' src/model/*.linkml.yml")
@@ -55,7 +54,7 @@ _generate-asciidoc:
         -o output/docs/adoc/modules/schema \
         -t /opt/build/templates \
         --render-diagrams \
-        output/model/{{fname_with_ver}}.linkml.yml
+        output/model/{{fname}}.linkml.yml
     echo "Adding schema documentation to nav…"
     yq -i '.nav += ["modules/schema/nav.adoc"]' output/docs/adoc/antora.yml
     echo 'Setting `version` key…'
@@ -77,9 +76,9 @@ _generate-schemas:
         echo; \
         gen-json-schema \
             --not-closed \
-            output/model/{{fname_with_ver}}.linkml.yml \
-            > output/schemas/json_schema/{{fname_with_ver}}.json_schema.json; \
-        cp output/schemas/json_schema/{{fname_with_ver}}.json_schema.json output/schemas/json_schema/{{fname}}.json_schema.json; \
+            output/model/{{fname}}.linkml.yml \
+            > output/schemas/json_schema/{{fname}}.json_schema.json; \
+        cp output/schemas/json_schema/{{fname}}.json_schema.json output/schemas/json_schema/{{fname}}.json_schema.json; \
         echo "… OK."; \
         echo; \
         echo "Generated JSON Schema files at: output/schemas/json_schema/"; \
@@ -90,28 +89,39 @@ _generate-schemas:
         echo; \
         gen-shacl \
             --closed \
-            output/model/{{fname_with_ver}}.linkml.yml \
-            > output/schemas/shacl/{{fname_with_ver}}.shacl.ttl; \
-        cp output/schemas/shacl/{{fname_with_ver}}.shacl.ttl output/schemas/shacl/{{fname}}.shacl.ttl; \
+            output/model/{{fname}}.linkml.yml \
+            > output/schemas/shacl/{{fname}}.shacl.ttl; \
+        cp output/schemas/shacl/{{fname}}.shacl.ttl output/schemas/shacl/{{fname}}.shacl.ttl; \
         echo "… OK."; \
         echo; \
         echo "Generated SHACL schema files at: output/schemas/shacl/"; \
         echo; \
     fi
 
-_create_xrefs:
+_assemble-docs: && _create-xrefs
+    cp -r output/model output/docs/adoc/modules/schema/attachments/
+    cp output/docs/adoc/modules/schema/attachments/model/{{fname}}.linkml.yml \
+       output/docs/adoc/modules/schema/attachments/model/{{fname}}.linkml_{{version}}.yml
+
+    [ ! -d output/schemas ] || cp -r output/schemas output/docs/adoc/modules/schema/attachments/
+    [ ! -d output/examples ] || cp -r output/examples output/docs/adoc/modules/schema/attachments/
+
+    # NOTE: Generate versioned filename duplicates.
+    find output/{schemas,examples} -type f | sed 's/\(.*\)\.\([a-zA-Z0-9]\+\)$/cp \1.\2 \1.{{version}}.\2/' | sh
+
+_create-xrefs:
     #!/bin/bash
     shopt -s nullglob
     index_adoc=output/docs/adoc/modules/ROOT/pages/index.adoc
     attachments_dir=output/docs/adoc/modules/schema/attachments
-    shacl_resid=schemas/shacl/{{fname_with_ver}}.shacl.ttl
-    json_schema_resid=schemas/json_schema/{{fname_with_ver}}.json_schema.json
+    shacl_resid=schemas/shacl/{{fname}}.shacl.{{version}}.ttl
+    json_schema_resid=schemas/json_schema/{{fname}}.json_schema.{{version}}.json
 
     echo -e '\n\n== Artifacts\n\n' >> $index_adoc
 
     # LinkML model
     echo -e 'Model::\n[unstyled]' >> $index_adoc
-    echo '* xref:schema:attachment$model/{{fname_with_ver}}.linkml.yml[LinkML]' >> $index_adoc
+    echo '* xref:schema:attachment$model/{{fname}}.linkml.{{version}}.yml[LinkML]' >> $index_adoc
 
     # Schemas
     echo -e 'Schemas::\n[unstyled]' >> $index_adoc
@@ -125,32 +135,26 @@ _create_xrefs:
     # Examples
     [ ! -d $attachments_dir/examples ] || echo -e 'Examples::\n[unstyled]' >> $index_adoc
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
-        for example_filepath in $attachments_dir/examples/jsonld/*.jsonld; do \
-            example_resid=${example_filepath#"$attachments_dir"/}; \
+        for example_filepath in $attachments_dir/examples/jsonld/*.{{version}}.jsonld; do \
+            example_resid=${example_filepath#"$attachments_dir"}; \
             example_title=$(jq -r '.["dcterms:title"]' $example_filepath); \
             echo "* xref:schema:attachment\$$example_resid[$example_title]" >> $index_adoc; \
         done; \
     elif [ "{{exchange_format}}" == "application/json" ]; then \
-        for example_filepath in $attachments_dir/examples/json/*.json; do \
+        for example_filepath in $attachments_dir/examples/json/*.{{version}}.json; do \
             example_resid=${example_filepath#"$attachments_dir"}; \
             example_title=$(jq -r '.title' $example_filepath); \
             echo "* xref:schema:attachment\$$example_resid[$example_title]" >> $index_adoc; \
         done; \
     fi
 
-_assemble-docs: && _create_xrefs
-    cp -r output/model output/docs/adoc/modules/schema/attachments/
-    [ ! -d output/schemas ] || cp -r output/schemas output/docs/adoc/modules/schema/attachments/
-    [ ! -d output/examples ] || cp -r output/examples output/docs/adoc/modules/schema/attachments/
-
 _post-process-schema:
     mkdir -p output/model
-    cp src/model/{{fname}}.linkml.yml output/model/{{fname_with_ver}}.linkml.yml
-    cp src/model/{{fname}}.linkml.yml output/model/{{fname}}.linkml.yml  # NOTE: This supports referencing the file with or without version number in its name.
-    yq -i '.version = "{{version}}"' output/model/{{fname_with_ver}}.linkml.yml
-    yq -i '.id = "{{schema_id}}"' output/model/{{fname_with_ver}}.linkml.yml
-    yq -i '.annotations.environment = strenv(ENV_URL)' output/model/{{fname_with_ver}}.linkml.yml
-    yq -i '.generation_date = "{{shell("date -I")}}"' output/model/{{fname_with_ver}}.linkml.yml
+    cp src/model/{{fname}}.linkml.yml output/model/{{fname}}.linkml.yml
+    yq -i '.version = "{{version}}"' output/model/{{fname}}.linkml.yml
+    yq -i '.id = "{{schema_id}}"' output/model/{{fname}}.linkml.yml
+    yq -i '.annotations.environment = strenv(ENV_URL)' output/model/{{fname}}.linkml.yml
+    yq -i '.generation_date = "{{shell("date -I")}}"' output/model/{{fname}}.linkml.yml
 
 # Build processing logic called by Antora Collector.
 [group("development")]
@@ -192,7 +196,7 @@ _generate-example-data:
         for example_file in src/examples/*.yml; do \
             mkdir -p output/examples/jsonld
             example_filename=$(basename $example_file); \
-            example_filepath=output/examples/jsonld/${example_filename%.*}_{{version}}.jsonld; \
+            example_filepath=output/examples/jsonld/${example_filename%.*}.jsonld; \
             gen-linkml-profile \
                 convert \
                 $example_file \
@@ -204,7 +208,7 @@ _generate-example-data:
         for example_file in src/examples/*.yml; do \
             mkdir -p output/examples/json
             example_filename=$(basename $example_file); \
-            example_filepath=output/examples/json/${example_filename%.*}_{{version}}.json; \
+            example_filepath=output/examples/json/${example_filename%.*}.json; \
             gen-linkml-profile \
                 convert \
                 $example_file \
@@ -228,11 +232,11 @@ _validate-example-data:
     echo
     if [ "{{exchange_format}}" == "application/ld+json" ]; then \
         for example_file in output/examples/jsonld/*.jsonld; do \
-            pyshacl -s output/schemas/shacl/{{fname_with_ver}}.shacl.ttl -df json-ld -f human $example_file; \
+            pyshacl -s output/schemas/shacl/{{fname}}.shacl.ttl -df json-ld -f human $example_file; \
         done; \
     elif [ "{{exchange_format}}" == "application/json" ]; then \
         for example_file in output/examples/json/*.json; do \
-            check-jsonschema --schemafile output/schemas/json_schema/{{fname_with_ver}}.json_schema.json $example_file; \
+            check-jsonschema --schemafile output/schemas/json_schema/{{fname}}.json_schema.json $example_file; \
         done; \
     fi
     echo
